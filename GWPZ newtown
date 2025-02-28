@@ -1,0 +1,358 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyP1WZFHey/BXU2FQViAkblY",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/BasuAI/BasuAI/blob/main/GWPZ%20newtown\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!pip install rasterio"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "QM9uMCK6hzOV",
+        "outputId": "909211cc-8ee3-4380-973f-a3d71f84369e"
+      },
+      "execution_count": 2,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Collecting rasterio\n",
+            "  Downloading rasterio-1.4.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.1 kB)\n",
+            "Collecting affine (from rasterio)\n",
+            "  Downloading affine-2.4.0-py3-none-any.whl.metadata (4.0 kB)\n",
+            "Requirement already satisfied: attrs in /usr/local/lib/python3.11/dist-packages (from rasterio) (25.1.0)\n",
+            "Requirement already satisfied: certifi in /usr/local/lib/python3.11/dist-packages (from rasterio) (2025.1.31)\n",
+            "Requirement already satisfied: click>=4.0 in /usr/local/lib/python3.11/dist-packages (from rasterio) (8.1.8)\n",
+            "Collecting cligj>=0.5 (from rasterio)\n",
+            "  Downloading cligj-0.7.2-py3-none-any.whl.metadata (5.0 kB)\n",
+            "Requirement already satisfied: numpy>=1.24 in /usr/local/lib/python3.11/dist-packages (from rasterio) (1.26.4)\n",
+            "Collecting click-plugins (from rasterio)\n",
+            "  Downloading click_plugins-1.1.1-py2.py3-none-any.whl.metadata (6.4 kB)\n",
+            "Requirement already satisfied: pyparsing in /usr/local/lib/python3.11/dist-packages (from rasterio) (3.2.1)\n",
+            "Downloading rasterio-1.4.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (22.2 MB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m22.2/22.2 MB\u001b[0m \u001b[31m72.4 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hDownloading cligj-0.7.2-py3-none-any.whl (7.1 kB)\n",
+            "Downloading affine-2.4.0-py3-none-any.whl (15 kB)\n",
+            "Downloading click_plugins-1.1.1-py2.py3-none-any.whl (7.5 kB)\n",
+            "Installing collected packages: cligj, click-plugins, affine, rasterio\n",
+            "Successfully installed affine-2.4.0 click-plugins-1.1.1 cligj-0.7.2 rasterio-1.4.3\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 3,
+      "metadata": {
+        "id": "U6g7PGokeuZW"
+      },
+      "outputs": [],
+      "source": [
+        "import numpy as np\n",
+        "import rasterio\n",
+        "import geopandas as gpd\n",
+        "import pandas as pd\n",
+        "import matplotlib.pyplot as plt\n",
+        "from rasterio.plot import show\n",
+        "from sklearn.ensemble import RandomForestClassifier\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "from sklearn.metrics import classification_report, accuracy_score\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Load raster data\n",
+        "raster_files = [\"/content/Clay.tif\", \"/content/DD.tif\", \"/content/DEM.tif\",\n",
+        "                \"/content/NDVI.tif\", \"/content/NDWI.tif\", \"/content/Rainfall.tif\",\n",
+        "                \"/content/Slope.tif\", \"/content/curveture.tif\", \"/content/meantemp.tif\",\n",
+        "                \"/content/sand.tif\"]\n",
+        "raster_data = []\n",
+        "\n",
+        "for file in raster_files:\n",
+        "    with rasterio.open(file) as src:\n",
+        "        raster_data.append(src.read(1).flatten())"
+      ],
+      "metadata": {
+        "id": "AafEfNDmezW-"
+      },
+      "execution_count": 14,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!pip install rasterio\n",
+        "!pip install geopandas\n",
+        "!pip install rioxarray\n",
+        "import rioxarray\n",
+        "import xarray as xr\n",
+        "\n",
+        "# Load raster data\n",
+        "raster_files = [\"/content/Clay.tif\", \"/content/DD.tif\", \"/content/DEM.tif\",\n",
+        "                \"/content/NDVI.tif\", \"/content/NDWI.tif\", \"/content/Rainfall.tif\",\n",
+        "                \"/content/Slope.tif\", \"/content/curveture.tif\", \"/content/meantemp.tif\",\n",
+        "                \"/content/sand.tif\"]\n",
+        "raster_data = []\n",
+        "\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "H_gQt0Z5v1W7",
+        "outputId": "047b7a61-ffef-4b28-c419-36eda97c171d"
+      },
+      "execution_count": 19,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Requirement already satisfied: rasterio in /usr/local/lib/python3.11/dist-packages (1.4.3)\n",
+            "Requirement already satisfied: affine in /usr/local/lib/python3.11/dist-packages (from rasterio) (2.4.0)\n",
+            "Requirement already satisfied: attrs in /usr/local/lib/python3.11/dist-packages (from rasterio) (25.1.0)\n",
+            "Requirement already satisfied: certifi in /usr/local/lib/python3.11/dist-packages (from rasterio) (2025.1.31)\n",
+            "Requirement already satisfied: click>=4.0 in /usr/local/lib/python3.11/dist-packages (from rasterio) (8.1.8)\n",
+            "Requirement already satisfied: cligj>=0.5 in /usr/local/lib/python3.11/dist-packages (from rasterio) (0.7.2)\n",
+            "Requirement already satisfied: numpy>=1.24 in /usr/local/lib/python3.11/dist-packages (from rasterio) (1.26.4)\n",
+            "Requirement already satisfied: click-plugins in /usr/local/lib/python3.11/dist-packages (from rasterio) (1.1.1)\n",
+            "Requirement already satisfied: pyparsing in /usr/local/lib/python3.11/dist-packages (from rasterio) (3.2.1)\n",
+            "Requirement already satisfied: geopandas in /usr/local/lib/python3.11/dist-packages (1.0.1)\n",
+            "Requirement already satisfied: numpy>=1.22 in /usr/local/lib/python3.11/dist-packages (from geopandas) (1.26.4)\n",
+            "Requirement already satisfied: pyogrio>=0.7.2 in /usr/local/lib/python3.11/dist-packages (from geopandas) (0.10.0)\n",
+            "Requirement already satisfied: packaging in /usr/local/lib/python3.11/dist-packages (from geopandas) (24.2)\n",
+            "Requirement already satisfied: pandas>=1.4.0 in /usr/local/lib/python3.11/dist-packages (from geopandas) (2.2.2)\n",
+            "Requirement already satisfied: pyproj>=3.3.0 in /usr/local/lib/python3.11/dist-packages (from geopandas) (3.7.1)\n",
+            "Requirement already satisfied: shapely>=2.0.0 in /usr/local/lib/python3.11/dist-packages (from geopandas) (2.0.7)\n",
+            "Requirement already satisfied: python-dateutil>=2.8.2 in /usr/local/lib/python3.11/dist-packages (from pandas>=1.4.0->geopandas) (2.8.2)\n",
+            "Requirement already satisfied: pytz>=2020.1 in /usr/local/lib/python3.11/dist-packages (from pandas>=1.4.0->geopandas) (2025.1)\n",
+            "Requirement already satisfied: tzdata>=2022.7 in /usr/local/lib/python3.11/dist-packages (from pandas>=1.4.0->geopandas) (2025.1)\n",
+            "Requirement already satisfied: certifi in /usr/local/lib/python3.11/dist-packages (from pyogrio>=0.7.2->geopandas) (2025.1.31)\n",
+            "Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.11/dist-packages (from python-dateutil>=2.8.2->pandas>=1.4.0->geopandas) (1.17.0)\n",
+            "Requirement already satisfied: rioxarray in /usr/local/lib/python3.11/dist-packages (0.18.2)\n",
+            "Requirement already satisfied: packaging in /usr/local/lib/python3.11/dist-packages (from rioxarray) (24.2)\n",
+            "Requirement already satisfied: rasterio>=1.3.7 in /usr/local/lib/python3.11/dist-packages (from rioxarray) (1.4.3)\n",
+            "Requirement already satisfied: xarray>=2024.7.0 in /usr/local/lib/python3.11/dist-packages (from rioxarray) (2025.1.2)\n",
+            "Requirement already satisfied: pyproj>=3.3 in /usr/local/lib/python3.11/dist-packages (from rioxarray) (3.7.1)\n",
+            "Requirement already satisfied: numpy>=1.23 in /usr/local/lib/python3.11/dist-packages (from rioxarray) (1.26.4)\n",
+            "Requirement already satisfied: certifi in /usr/local/lib/python3.11/dist-packages (from pyproj>=3.3->rioxarray) (2025.1.31)\n",
+            "Requirement already satisfied: affine in /usr/local/lib/python3.11/dist-packages (from rasterio>=1.3.7->rioxarray) (2.4.0)\n",
+            "Requirement already satisfied: attrs in /usr/local/lib/python3.11/dist-packages (from rasterio>=1.3.7->rioxarray) (25.1.0)\n",
+            "Requirement already satisfied: click>=4.0 in /usr/local/lib/python3.11/dist-packages (from rasterio>=1.3.7->rioxarray) (8.1.8)\n",
+            "Requirement already satisfied: cligj>=0.5 in /usr/local/lib/python3.11/dist-packages (from rasterio>=1.3.7->rioxarray) (0.7.2)\n",
+            "Requirement already satisfied: click-plugins in /usr/local/lib/python3.11/dist-packages (from rasterio>=1.3.7->rioxarray) (1.1.1)\n",
+            "Requirement already satisfied: pyparsing in /usr/local/lib/python3.11/dist-packages (from rasterio>=1.3.7->rioxarray) (3.2.1)\n",
+            "Requirement already satisfied: pandas>=2.1 in /usr/local/lib/python3.11/dist-packages (from xarray>=2024.7.0->rioxarray) (2.2.2)\n",
+            "Requirement already satisfied: python-dateutil>=2.8.2 in /usr/local/lib/python3.11/dist-packages (from pandas>=2.1->xarray>=2024.7.0->rioxarray) (2.8.2)\n",
+            "Requirement already satisfied: pytz>=2020.1 in /usr/local/lib/python3.11/dist-packages (from pandas>=2.1->xarray>=2024.7.0->rioxarray) (2025.1)\n",
+            "Requirement already satisfied: tzdata>=2022.7 in /usr/local/lib/python3.11/dist-packages (from pandas>=2.1->xarray>=2024.7.0->rioxarray) (2025.1)\n",
+            "Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.11/dist-packages (from python-dateutil>=2.8.2->pandas>=2.1->xarray>=2024.7.0->rioxarray) (1.17.0)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Open the first raster to get the shape and CRS\n",
+        "with rioxarray.open_rasterio(raster_files[0]) as first_raster:\n",
+        "    raster_shape = first_raster.shape\n",
+        "    raster_crs = first_raster.rio.crs\n",
+        "\n",
+        "for file in raster_files:\n",
+        "    with rioxarray.open_rasterio(file) as src:\n",
+        "        # Reproject and resample the raster if necessary\n",
+        "        if src.rio.crs != raster_crs or src.shape != raster_shape:\n",
+        "            src = src.rio.reproject_match(first_raster) #reproject and resample to match first raster\n",
+        "        raster_data.append(src.data.flatten())"
+      ],
+      "metadata": {
+        "id": "WpNU69FdwKih"
+      },
+      "execution_count": 20,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Stack raster data into a feature matrix\n",
+        "X = np.column_stack(raster_data)\n"
+      ],
+      "metadata": {
+        "id": "2Kw6UzRue4W8"
+      },
+      "execution_count": 21,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Load groundwater sample points\n",
+        "gdf = gpd.read_file(\"groundwater_points.shp\")\n",
+        "y = gdf['priority_zone'].values  # Groundwater priority class (0 = low, 1 = medium, 2 = high)\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 408
+        },
+        "id": "Dzlo7pa3e4T7",
+        "outputId": "1978b014-fd79-49c9-e9f8-548f9155d7bd"
+      },
+      "execution_count": 11,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "DataSourceError",
+          "evalue": "groundwater_points.shp: No such file or directory",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mDataSourceError\u001b[0m                           Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-11-ed0c2ce36955>\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      1\u001b[0m \u001b[0;31m# Load groundwater sample points\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 2\u001b[0;31m \u001b[0mgdf\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mgpd\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mread_file\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"groundwater_points.shp\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      3\u001b[0m \u001b[0my\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mgdf\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m'priority_zone'\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mvalues\u001b[0m  \u001b[0;31m# Groundwater priority class (0 = low, 1 = medium, 2 = high)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.11/dist-packages/geopandas/io/file.py\u001b[0m in \u001b[0;36m_read_file\u001b[0;34m(filename, bbox, mask, columns, rows, engine, **kwargs)\u001b[0m\n\u001b[1;32m    292\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    293\u001b[0m     \u001b[0;32mif\u001b[0m \u001b[0mengine\u001b[0m \u001b[0;34m==\u001b[0m \u001b[0;34m\"pyogrio\"\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 294\u001b[0;31m         return _read_file_pyogrio(\n\u001b[0m\u001b[1;32m    295\u001b[0m             \u001b[0mfilename\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mbbox\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mbbox\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mmask\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mmask\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcolumns\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mcolumns\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mrows\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mrows\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m**\u001b[0m\u001b[0mkwargs\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    296\u001b[0m         )\n",
+            "\u001b[0;32m/usr/local/lib/python3.11/dist-packages/geopandas/io/file.py\u001b[0m in \u001b[0;36m_read_file_pyogrio\u001b[0;34m(path_or_bytes, bbox, mask, rows, **kwargs)\u001b[0m\n\u001b[1;32m    545\u001b[0m         \u001b[0mkwargs\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m\"columns\"\u001b[0m\u001b[0;34m]\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mkwargs\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mpop\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"include_fields\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    546\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 547\u001b[0;31m     \u001b[0;32mreturn\u001b[0m \u001b[0mpyogrio\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mread_dataframe\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mpath_or_bytes\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mbbox\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mbbox\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m**\u001b[0m\u001b[0mkwargs\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    548\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    549\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.11/dist-packages/pyogrio/geopandas.py\u001b[0m in \u001b[0;36mread_dataframe\u001b[0;34m(path_or_buffer, layer, encoding, columns, read_geometry, force_2d, skip_features, max_features, where, bbox, mask, fids, sql, sql_dialect, fid_as_index, use_arrow, on_invalid, arrow_to_pandas_kwargs, **kwargs)\u001b[0m\n\u001b[1;32m    263\u001b[0m         \u001b[0;31m# as numpy does not directly support timezones.\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    264\u001b[0m         \u001b[0mkwargs\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m\"datetime_as_string\"\u001b[0m\u001b[0;34m]\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;32mTrue\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 265\u001b[0;31m     result = read_func(\n\u001b[0m\u001b[1;32m    266\u001b[0m         \u001b[0mpath_or_buffer\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    267\u001b[0m         \u001b[0mlayer\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mlayer\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.11/dist-packages/pyogrio/raw.py\u001b[0m in \u001b[0;36mread\u001b[0;34m(path_or_buffer, layer, encoding, columns, read_geometry, force_2d, skip_features, max_features, where, bbox, mask, fids, sql, sql_dialect, return_fids, datetime_as_string, **kwargs)\u001b[0m\n\u001b[1;32m    196\u001b[0m     \u001b[0mdataset_kwargs\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0m_preprocess_options_key_value\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mkwargs\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;32mif\u001b[0m \u001b[0mkwargs\u001b[0m \u001b[0;32melse\u001b[0m \u001b[0;34m{\u001b[0m\u001b[0;34m}\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    197\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 198\u001b[0;31m     return ogr_read(\n\u001b[0m\u001b[1;32m    199\u001b[0m         \u001b[0mget_vsi_path_or_buffer\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mpath_or_buffer\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    200\u001b[0m         \u001b[0mlayer\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mlayer\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32mpyogrio/_io.pyx\u001b[0m in \u001b[0;36mpyogrio._io.ogr_read\u001b[0;34m()\u001b[0m\n",
+            "\u001b[0;32mpyogrio/_io.pyx\u001b[0m in \u001b[0;36mpyogrio._io.ogr_open\u001b[0;34m()\u001b[0m\n",
+            "\u001b[0;31mDataSourceError\u001b[0m: groundwater_points.shp: No such file or directory"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Train-test split\n",
+        "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 158
+        },
+        "id": "rCyKkYude4Q-",
+        "outputId": "1b050d4c-cf56-4597-bd49-409dc7566bbd"
+      },
+      "execution_count": 22,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'y' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-22-b7f97d9700f9>\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      1\u001b[0m \u001b[0;31m# Train-test split\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 2\u001b[0;31m \u001b[0mX_train\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mX_test\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_train\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_test\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mtrain_test_split\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mX\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mtest_size\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m0.2\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mrandom_state\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m42\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m: name 'y' is not defined"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "\n",
+        "# Train Random Forest model\n",
+        "rf = RandomForestClassifier(n_estimators=100, random_state=42)\n",
+        "rf.fit(X_train, y_train)\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "q5bv8MuYe4Nw"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Model Evaluation\n",
+        "y_pred = rf.predict(X_test)\n",
+        "print(classification_report(y_test, y_pred))\n",
+        "print(\"Accuracy:\", accuracy_score(y_test, y_pred))\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "2iNbt76de4KM"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Apply model to entire raster dataset\n",
+        "prediction = rf.predict(X).reshape(raster_data[0].shape)\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "Jog7oCtFe4Em"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Save output as a raster\n",
+        "with rasterio.open(\"groundwater_priority_map.tif\", \"w\",\n",
+        "                   driver=\"GTiff\",\n",
+        "                   height=prediction.shape[0],\n",
+        "                   width=prediction.shape[1],\n",
+        "                   count=1, dtype=prediction.dtype) as dst:\n",
+        "    dst.write(prediction, 1)\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "YYHvmr1_e37w"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Plot results\n",
+        "plt.imshow(prediction, cmap='coolwarm')\n",
+        "plt.colorbar(label=\"Groundwater Priority Zone\")\n",
+        "plt.title(\"Groundwater Priority Zone Map\")\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "id": "yy_Pm80SfSY9"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
